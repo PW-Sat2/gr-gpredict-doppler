@@ -18,19 +18,26 @@ from gnuradio import gr
 import threading
 import time
 import socket
+import thread
 
 
-class doppler_runner(threading.Thread):
+class doppler(gr.basic_block):
   def __init__(self, callback, gpredict_host, gpredict_port, verbose):
-    threading.Thread.__init__(self)
+
+    gr.basic_block.__init__(self,
+        name="doppler",
+        in_sig=None,
+        out_sig=None)
 
     self.callback = callback
     self.gpredict_host = gpredict_host
     self.gpredict_port = gpredict_port
     self.verbose = verbose
 
+    thread.start_new_thread(self.loop, ())
 
-  def run(self):
+
+  def loop(self):
     bind_to = (self.gpredict_host, self.gpredict_port)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(bind_to)
@@ -61,12 +68,3 @@ class doppler_runner(threading.Thread):
 
       sock.close()
       if self.verbose: print "Disconnected from: %s:%d" % (addr[0], addr[1])
-
-
-class doppler(gr.sync_block):
-  def __init__(self, callback, gpredict_host, gpredict_port, verbose):
-    gr.sync_block.__init__(self,
-                           name = "Gpredict Doppler",
-                           in_sig = None,
-                           out_sig = None)
-    doppler_runner(callback, gpredict_host, gpredict_port, verbose).start()
