@@ -40,6 +40,7 @@ class doppler(gr.basic_block):
   def loop(self):
     bind_to = (self.gpredict_host, self.gpredict_port)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(bind_to)
     server.listen(0)
 
