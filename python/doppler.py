@@ -57,15 +57,18 @@ class doppler(gr.basic_block):
         if not data:
           break
 
-        if data.startswith('F'):
-          freq = int(data[1:].strip())
-          if cur_freq != freq:
-            if self.verbose: print "New frequency: %d" % freq
-            self.callback(freq)
-            cur_freq = freq
-          sock.sendall("RPRT 0\n")
-        elif data.startswith('f'):
-          sock.sendall("f: %d\n" % cur_freq)
+        try:
+          if data.startswith('F'):
+            freq = int(data[1:].strip())
+            if cur_freq != freq:
+              if self.verbose: print "New frequency: %d" % freq
+              self.callback(freq)
+              cur_freq = freq
+            sock.sendall("RPRT 0\n")
+          elif data.startswith('f'):
+            sock.sendall("f: %d\n" % cur_freq)
+        except Exception as e:
+          print e
 
       sock.close()
       if self.verbose: print "Disconnected from: %s:%d" % (addr[0], addr[1])
